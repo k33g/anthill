@@ -44,6 +44,9 @@ function consumeRabbitEventQueue(connection) {
 function setup () {
   console.log('Mosca listening on ' + moscaSettings.port);
   server.authenticate = function(client, user, pwd, cb) {
+
+    console.log(client, user)
+
     if(typeof user != 'null' && typeof pwd != 'null') {
       if(user === process.env.AUTH_USER && pwd.toString() == process.env.AUTH_PASSWORD) {
         client.user = user;
