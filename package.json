@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/k33g/anthill/issues"
   },
-  "homepage": "https://github.com/k33g/anthill#readme"
+  "homepage": "https://github.com/k33g/anthill#readme",
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "mosca": "^2.7.0"
+  }
 }
