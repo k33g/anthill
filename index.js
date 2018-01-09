@@ -13,12 +13,14 @@ let server = new mosca.Server(moscaSettings)
 
 function setup () {
   console.log('Mosca listening on ' + moscaSettings.port);
+  /*
   var connectionP = amqp.connect(process.env.RABBIT_URI);
   connectionP.then(consumeRabbitEventQueue);
   connectionP.catch(function(e) { console.error(e); });
+  */
 
 }
-
+/*
 function consumeRabbitEventQueue(connection) {
   console.log("Connected to RabbitMQ.");
   connection.createChannel().then(function(channel) {
@@ -45,8 +47,7 @@ function sendMessage(payload) {
     retain: false
   }, function() {  });
 };
-
-
+*/
 
 server.on('clientConnected', function(client) {
   console.log('client connected', client.id);
