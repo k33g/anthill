@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/k33g/anthill#readme",
   "dependencies": {
-    "amqplib": "^0.5.2",
-    "mosca": "^2.7.0"
+    "amqplib": "^0.5.1",
+    "express": "^4.15.2",
+    "mosca": "^2.3.0",
+    "rxjs": "^5.2.1-smooth"
   }
 }
