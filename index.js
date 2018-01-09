@@ -87,9 +87,9 @@ const requestHandler = (request, response) => {
   response.end('Hello Node.js Server!')
 }
 
-const server = http.createServer(requestHandler)
+const httpServer = http.createServer(requestHandler)
 
-server.listen(port, (err) => {
+httpServer.listen(port, (err) => {
   if (err) {
     return console.log('something bad happened', err)
   }
