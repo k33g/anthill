@@ -4,9 +4,11 @@ const port = process.env.PORT || 8080
 const mosca = require('mosca')
 const amqp = require('amqplib')
 
-let server = new mosca.Server({
+let moscaSettings = {
   port: parseInt(process.env.MQTT_PORT) || 5008
-})
+}
+
+let server = new mosca.Server(moscaSettings)
 
 function sendMessage(payload) {
   server.publish({
