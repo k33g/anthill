@@ -39,12 +39,13 @@ function setup() {
       }
     }
   }
-  
+  /*
   var connectionP = amqp.connect(process.env.RABBIT_URI);
   connectionP.then(consumeRabbitEventQueue);
   connectionP.catch(function(e) { console.error(e); });
+  */
 
-  generateDummyEvents();
+  //generateDummyEvents();
 }
 
 function consumeRabbitEventQueue(connection) {
