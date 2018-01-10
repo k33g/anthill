@@ -1,37 +1,17 @@
-var mosca = require('mosca');
-var amqp = require('amqplib');
-var express = require('express');
-var Rx = require('rxjs');
+const mosca = require('mosca')
+const express = require('express')
 
-var moscaSettings = {
+let moscaSettings = {
   port: parseInt(process.env.MQTT_PORT)
-};
+}
 
-var server = new mosca.Server(moscaSettings);
+let server = new mosca.Server(moscaSettings);
 
-server.on('ready', setup);
-server.on('clientConnected', function(client) { console.log('client connected: ' + client.id); });
-server.on('clientDisconnecting', function(client) { console.log('client disconnecting:' + client.id); });
-server.on('clientDisconnected', function(client) { console.log('client disconnected:' + client.id); });
-server.on('subscribed', function(topic, client) { console.log('client ' + client.id + ' subscribed to topic ' + topic); });
-server.on('unsubscribed', function(topic, client) { console.log('client ' + client.id + ' unsubscribed from topic ' + topic); });
-server.on('published', function(packet, client) {
-  var clientName;
-  if(client === null || typeof client == "undefined") {
-    clientName = 'an unknown client';
-  } else {
-    clientName = 'client ' + client.id;
-  }
-  console.log(
-    'Sent message to ' + clientName +
-    ' on topic ' + packet.topic + ': ' +
-    packet.payload + ' (messageId: ' + packet.messageId + ')'
-  );
-});
+server.on('ready', () => {
+  console.log(`👋 Mosca listening on ${moscaSettings.port}`)
 
-function setup() {
-  console.log('Mosca listening on ' + moscaSettings.port);
-  server.authenticate = function(client, user, pwd, cb) {
+  // TODO: refactor
+  server.authenticate = (client, user, pwd, cb) => {
     if(typeof user != 'null' && typeof pwd != 'null') {
       if(user === process.env.AUTH_USER && pwd.toString() == process.env.AUTH_PASSWORD) {
         client.user = user;
@@ -39,56 +19,37 @@ function setup() {
       }
     }
   }
-  /*
-  var connectionP = amqp.connect(process.env.RABBIT_URI);
-  connectionP.then(consumeRabbitEventQueue);
-  connectionP.catch(function(e) { console.error(e); });
-  */
+})
 
-  //generateDummyEvents();
-}
+server.on('clientConnected', (client) => { 
+  console.log(`client connected: ${client.id}`)
+})
+server.on('clientDisconnecting', (client) => { 
+  console.log(`client disconnecting: ${client.id}`)
+})
+server.on('clientDisconnected', (client) => { 
+  console.log(`client disconnected: ${client.id}`)
+})
+server.on('subscribed', (topic, client) => { 
+  console.log(`client ${client.id} subscribed to topic ${topic}`) 
+})
+server.on('unsubscribed', (topic, client) => { 
+  console.log(`client ${client.id} unsubscribed from topic ${topic}`) 
+})
+server.on('published', (packet, client) => {
+  let clientName = client === null || typeof client == "undefined" 
+    ? 'an unknown client' 
+    : `client ${client.id}`
+  
+  console.log(`==[START]=======================================================`)
+  console.log(` 💌 to:`, clientName, `topic:`, packet.topic);
+  console.log(` ℹ️ messageId:`, packet.messageId)
+  console.log(` 📝 content:`, packet.payload)
+  console.log(`==[END]=========================================================`)
 
-function consumeRabbitEventQueue(connection) {
-  console.log("Connected to RabbitMQ.");
-  connection.createChannel().then(function(channel) {
-    var queue = process.env.RABBIT_QUEUE;
-    channel.assertQueue(queue, {durable: false}).then(function() {
-      channel.consume(queue, handleMessage, {noAck: true});
-    });
-  });
-};
+});
 
-function handleMessage(message) {
-  var evt = JSON.parse(message.content);
-  var payload = evt.event;
-  if(payload != "CLEVER_TOOLS_REQUEST") {
-    sendMessage(payload);
-  }
-};
-
-function generateDummyEvents() {
-  function randomDelay(bottom, top) {
-    var x = Math.floor(Math.random() * (top - bottom)) + bottom;
-    return x;
-  }
-
-  var source = Rx.Observable
-    .of("")
-    .switchMap(function(x) {
-      return Rx.Observable
-        .of("")
-        .delay(randomDelay(
-          parseInt(process.env.DUMMY_EVENT_MIN_DELAY),
-          parseInt(process.env.DUMMY_EVENT_MAX_DELAY)
-        ));
-    })
-    .repeat();
-
-  source.subscribe(function(x) {
-    sendMessage("DUMMY_EVENT");
-  });
-};
-
+// TODO: refactor
 function sendMessage(payload) {
   server.publish({
     topic: process.env.MQTT_TOPIC,
