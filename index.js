@@ -74,9 +74,6 @@ httpServer.use(bodyParser.json());
 httpServer.use(bodyParser.urlencoded({extended: false}));
 httpServer.use(express.static('public'));
 
-httpServer.get('/', (request, response) => {
-  response.send('Hello.')
-})
 
 // http://anthill.cleverapps.io/send/mqtt/topic/<topic_name>/message/<message_value>
 // http://anthill.cleverapps.io/send/mqtt/topic/hello/message/hello-world
@@ -92,9 +89,10 @@ httpServer.get('/send/mqtt/topic/:topic/message/:value', (request, response) => 
     retain: false // or true
   };
 
-  mqttBroker.publish(mqttMessage, ()=> {
+  mqttBroker.publish(mqttMessage, function() {
     // foo
   });
+  response.send('Hello.')
 
 })
 
