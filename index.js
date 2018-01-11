@@ -17,9 +17,9 @@ mqttBroker.on('ready', () => {
 
   // TODO: refactor
   mqttBroker.authenticate = (client, user, pwd, cb) => {
-    if(typeof user != 'null' && typeof pwd != 'null') {
+    if(user && pwd) {
       if(user === process.env.AUTH_USER && pwd.toString() == process.env.AUTH_PASSWORD) {
-        console.log(`😃 client authenticated`)
+        console.log(`😃 ${client.id} authenticated`)
         client.user = user;
         cb(null, true);
       }
@@ -46,21 +46,16 @@ mqttBroker.on('published', (packet, client) => {
 
   if(packet.payload instanceof Buffer) {
 
-    
-
     let displayInformations = (client, packet, data) => {
 
-      let clientName = client ? 'John Doe' : `${client.id}`
-
       console.log(`==[START]=======================================================`)
-      console.log(` 💌 from:`, clientName, `topic:`, packet.topic);
+      console.log(` 💌 from:`, client.id, `topic:`, packet.topic);
       console.log(` ℹ️ messageId:`, packet.messageId)
       console.log(` 📝 content:`, data)
       console.log(`==[END]=========================================================`)
     }
 
     try {
-      //let data = JSON.parse(packet.payload.toString().replace(/\0/g,""))
       let data = JSON.parse(packet.payload.toString('utf8'))
       console.log("😍", "json data")
       displayInformations(client, packet, data)
