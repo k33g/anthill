@@ -1,19 +1,25 @@
+/**
+ * MQTT Broker - Demo for Clever Cloud
+ */
+
 const mosca = require('mosca')
 const express = require('express')
+const bodyParser = require("body-parser");
 
 let moscaSettings = {
   port: parseInt(process.env.MQTT_PORT)
 }
 
-let server = new mosca.Server(moscaSettings);
+let mqttBroker = new mosca.mqttBroker(moscaSettings);
 
-server.on('ready', () => {
+mqttBroker.on('ready', () => {
   console.log(`👋 Mosca listening on ${moscaSettings.port}`)
 
   // TODO: refactor
-  server.authenticate = (client, user, pwd, cb) => {
+  mqttBroker.authenticate = (client, user, pwd, cb) => {
     if(typeof user != 'null' && typeof pwd != 'null') {
       if(user === process.env.AUTH_USER && pwd.toString() == process.env.AUTH_PASSWORD) {
+        console.log(`😃 client authenticated`)
         client.user = user;
         cb(null, true);
       }
@@ -21,60 +27,77 @@ server.on('ready', () => {
   }
 })
 
-server.on('clientConnected', (client) => { 
+mqttBroker.on('clientConnected', (client) => { 
   console.log(`client connected: ${client.id}`)
 })
-server.on('clientDisconnecting', (client) => { 
+mqttBroker.on('clientDisconnecting', (client) => { 
   console.log(`client disconnecting: ${client.id}`)
 })
-server.on('clientDisconnected', (client) => { 
+mqttBroker.on('clientDisconnected', (client) => { 
   console.log(`client disconnected: ${client.id}`)
 })
-server.on('subscribed', (topic, client) => { 
+mqttBroker.on('subscribed', (topic, client) => { 
   console.log(`client ${client.id} subscribed to topic ${topic}`) 
 })
-server.on('unsubscribed', (topic, client) => { 
+mqttBroker.on('unsubscribed', (topic, client) => { 
   console.log(`client ${client.id} unsubscribed from topic ${topic}`) 
 })
-server.on('published', (packet, client) => {
-  let clientName = client === null || typeof client == "undefined" 
-    ? 'an unknown client' 
-    : `client ${client.id}`
-  
-  console.log(`==[START]=======================================================`)
-  console.log(` 💌 to:`, clientName, `topic:`, packet.topic);
-  console.log(` ℹ️ messageId:`, packet.messageId)
-  console.log(` 📝 content:`, packet.payload)
-  console.log(`==[END]=========================================================`)
+mqttBroker.on('published', (packet, client) => {
 
-});
+  if(packet.cmd=="publish") {
 
-// TODO: refactor
-function sendMessage(payload) {
-  server.publish({
-    topic: process.env.MQTT_TOPIC,
-    payload: payload,
-    qos: 0,
-    retain: false
-  }, function() {  });
-};
+    let displayInformations = (client, packet, data) => {
 
-var httpServer = express();
+      let clientName = client === null || typeof client == "undefined" 
+        ? 'an unknown client' 
+        : `client ${client.id}`
 
-httpServer.get('/', function(request, response) {
-  response.send('Hello.');
-});
+      console.log(`==[START]=======================================================`)
+      console.log(` 💌 to:`, clientName, `topic:`, packet.topic);
+      console.log(` ℹ️ messageId:`, packet.messageId)
+      console.log(` 📝 content:`, packet.payload)
+      console.log(`==[END]=========================================================`)
+    }
 
-httpServer.get('/sendMessage', function(request, response) {
-  var p = request.query.payload;
-  if(p !== null && typeof p != "undefined") {
-    sendMessage(request.query.payload);
-    response.send('Sent.');
-  } else {
-    response.send('You need to add a query parameter named payload');
+    try {
+      let data = JSON.parse(packet.payload.toString().replace(/\0/g,""))
+      displayInformations(client, packet, data)
+    } catch (error) {
+      let data = packet.payload
+      displayInformations(client, packet, data)
+      
+    }
   }
+
+
 });
 
-httpServer.listen(process.env.PORT, function() {
-  console.log('HTTP listening on ' + process.env.PORT);
-});
+const httpServer = express()
+httpServer.use(bodyParser.json());
+httpServer.use(bodyParser.urlencoded({extended: false}));
+httpServer.use(express.static('public'));
+
+httpServer.get('/', (request, response) => {
+  response.send('Hello.')
+})
+
+// http://anthill.cleverapps.io/send/mqtt/topic/<topic_name>/message/<message_value>
+httpServer.get('/send/mqtt/topic/:topic/message/:value', (request, response) => {
+  
+  let topic = request.params["topic"] ? request.params["topic"] : "no-topic"
+  let message = request.params["value"] ? request.params["value"] : "no-value"
+
+  let message = {
+    topic: topic,
+    payload: JSON.stringify({message: value}), // or a Buffer
+    qos: 0, // 0, 1, or 2
+    retain: false // or true
+  };
+
+  mqttBroker.publish(message, function() {});
+
+})
+
+httpServer.listen(process.env.PORT, () => {
+  console.log(`🌍 listening on ${process.env.PORT}`)
+})

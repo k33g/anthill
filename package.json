@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/k33g/anthill#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
     "express": "^4.15.2",
     "mosca": "^2.3.0"
   }
