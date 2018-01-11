@@ -59,7 +59,7 @@ mqttBroker.on('published', (packet, client) => {
       console.log(`==[START]=======================================================`)
       console.log(` 💌 to:`, clientName, `topic:`, packet.topic);
       console.log(` ℹ️ messageId:`, packet.messageId)
-      console.log(` 📝 content:`, packet.payload)
+      console.log(` 📝 content:`, data)
       console.log(`==[END]=========================================================`)
     }
 
@@ -86,6 +86,7 @@ httpServer.get('/', (request, response) => {
 })
 
 // http://anthill.cleverapps.io/send/mqtt/topic/<topic_name>/message/<message_value>
+// http://anthill.cleverapps.io/send/mqtt/topic/hello/message/hello-world
 httpServer.get('/send/mqtt/topic/:topic/message/:value', (request, response) => {
   
   let topic = request.params["topic"] ? request.params["topic"] : "no-topic"
