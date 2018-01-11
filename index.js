@@ -44,32 +44,30 @@ mqttBroker.on('unsubscribed', (topic, client) => {
 })
 mqttBroker.on('published', (packet, client) => {
 
-  console.log("⚠️", packet)
-
   if(packet.payload instanceof Buffer) {
 
-    console.log("❤️️️️️❤️❤️")
+    
 
     let displayInformations = (client, packet, data) => {
 
-      let clientName = client === null || typeof client == "undefined" 
-        ? 'an unknown client' 
-        : `client ${client.id}`
+      let clientName = client ? 'John Doe' : `${client.id}`
 
       console.log(`==[START]=======================================================`)
-      console.log(` 💌 to:`, clientName, `topic:`, packet.topic);
+      console.log(` 💌 from:`, clientName, `topic:`, packet.topic);
       console.log(` ℹ️ messageId:`, packet.messageId)
       console.log(` 📝 content:`, data)
       console.log(`==[END]=========================================================`)
     }
 
     try {
-      let data = JSON.parse(packet.payload.toString().replace(/\0/g,""))
+      //let data = JSON.parse(packet.payload.toString().replace(/\0/g,""))
+      let data = JSON.parse(packet.payload.toString('utf8'))
+      console.log("😍", "json data")
       displayInformations(client, packet, data)
     } catch (error) {
-      let data = packet.payload
+      console.log("😡", "txt data")
+      let data = packet.payload.toString('utf8')
       displayInformations(client, packet, data)
-      
     }
   }
 
