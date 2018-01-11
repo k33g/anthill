@@ -82,6 +82,7 @@ httpServer.get('/send/mqtt/topic/:topic/message/:value', (request, response) => 
   let topic = request.params["topic"] ? request.params["topic"] : "no-topic"
   let value = request.params["value"] ? request.params["value"] : "no-value"
 
+
   let mqttMessage = {
     topic: topic,
     payload: JSON.stringify({message: value}), // or a Buffer
@@ -89,10 +90,16 @@ httpServer.get('/send/mqtt/topic/:topic/message/:value', (request, response) => 
     retain: false // or true
   };
 
-  mqttBroker.publish(mqttMessage, function() {
-    // foo
-  });
-  response.send('Hello.')
+  mqttBroker.publish(mqttMessage, () => {
+    console.log("Broker published message")
+    console.log("on topic:", topic)
+    console.log("message:", value)
+  })
+
+  response.send({
+    topic: topic,
+    message: value
+  })
 
 })
 
