@@ -44,10 +44,9 @@ mqttBroker.on('unsubscribed', (topic, client) => {
 })
 mqttBroker.on('published', (packet, client) => {
 
-  console.log("⚠️", packet.cmd)
   console.log("⚠️", packet)
 
-  if(packet.cmd=="publish") {
+  if(packet.payload instanceof Buffer) {
 
     console.log("❤️️️️️❤️❤️")
 
