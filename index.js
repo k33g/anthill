@@ -10,7 +10,7 @@ let moscaSettings = {
   port: parseInt(process.env.MQTT_PORT)
 }
 
-let mqttBroker = new mosca.mqttBroker(moscaSettings);
+let mqttBroker = new mosca.Server(moscaSettings);
 
 mqttBroker.on('ready', () => {
   console.log(`👋 Mosca listening on ${moscaSettings.port}`)
