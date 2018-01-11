@@ -47,7 +47,7 @@ mqttBroker.on('published', (packet, client) => {
   if(packet.payload instanceof Buffer) {
 
     let displayInformations = (client, packet, data) => {
-
+      // client.id is never null or undefined, Mosca set a default random id if no id
       console.log(`==[START]=======================================================`)
       console.log(` 💌 from:`, client.id, `topic:`, packet.topic);
       console.log(` ℹ️ messageId:`, packet.messageId)
@@ -83,7 +83,7 @@ httpServer.get('/', (request, response) => {
 httpServer.get('/send/mqtt/topic/:topic/message/:value', (request, response) => {
   
   let topic = request.params["topic"] ? request.params["topic"] : "no-topic"
-  let message = request.params["value"] ? request.params["value"] : "no-value"
+  let value = request.params["value"] ? request.params["value"] : "no-value"
 
   let mqttMessage = {
     topic: topic,
